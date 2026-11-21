@@ -1,4 +1,4 @@
-name: Simple Android APK Build
+name: Build Android APK
 
 on:
   push:
@@ -10,25 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: سحب ملفات المستودع
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: تثبيت بيئة Java 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: gradle
 
-      - name: Prepare gradle wrapper jar
+      - name: التأكد من وجود gradle-wrapper.jar
         run: |
           mkdir -p gradle/wrapper
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.jar" -o gradle/wrapper/gradle-wrapper.jar
           fi
-          chmod +x gradlew
 
-      - name: Assemble Debug APK
+      - name: إعداد Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: إعطاء صلاحية التشغيل لملف gradlew
+        run: chmod +x gradlew
+
+      - name: بناء ملف APK التجريبي
         run: ./gradlew assembleDebug
 
-      - uses: actions/upload-artifact@v4
+      - name: رفع ملف APK كملف مرفق
+        uses: actions/upload-artifact@v4
         with:
-          name: LowDataLiveTV-APK
+          name: LowDataLiveTV-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
