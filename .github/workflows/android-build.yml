@@ -1,9 +1,10 @@
-name: Build Android APK
+name: Android Build
 
 on:
   push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -24,20 +25,17 @@ jobs:
         run: |
           mkdir -p gradle/wrapper
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.jar" -o gradle/wrapper/gradle-wrapper.jar
+            gradle wrapper --gradle-version 8.5
           fi
 
-      - name: إعداد Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: إعطاء صلاحية التشغيل لملف gradlew
+      - name: إعطاء صلاحيات التشغيل لملف gradlew
         run: chmod +x gradlew
 
-      - name: بناء ملف APK التجريبي
+      - name: بناء تطبيق الأندرويد (APK)
         run: ./gradlew assembleDebug
 
-      - name: رفع ملف APK كملف مرفق
+      - name: رفع ملف التطبيق الناتج
         uses: actions/upload-artifact@v4
         with:
-          name: LowDataLiveTV-debug-apk
+          name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
